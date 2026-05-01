@@ -19,3 +19,6 @@ class User(Base):
     assigned_tickets: Mapped[list["Ticket"]] = relationship("Ticket", foreign_keys="Ticket.assignee_id", back_populates="assignee")
     comments: Mapped[list["Comment"]] = relationship("Comment", back_populates="author")
     notifications: Mapped[list["Notification"]] = relationship("Notification", back_populates="user")
+    attachments: Mapped[list["Attachment"]] = relationship(
+        "Attachment", foreign_keys="Attachment.uploaded_by", back_populates="uploader"
+    )
