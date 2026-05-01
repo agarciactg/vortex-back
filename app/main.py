@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.core.redis import close_redis
-from app.routers import auth, users, tickets
+from app.routers import auth, users, tickets, comments
 
 
 @asynccontextmanager
@@ -41,6 +41,7 @@ PREFIX = "/api/v1"
 app.include_router(auth.router, prefix=f"{PREFIX}/auth", tags=["Autenticación"])
 app.include_router(users.router, prefix=f"{PREFIX}/users", tags=["Usuarios"])
 app.include_router(tickets.router, prefix=f"{PREFIX}/tickets", tags=["Tickets"])
+app.include_router(comments.router, prefix=f"{PREFIX}/tickets", tags=["Comments"])
 
 
 @app.get("/health", tags=["Health"])
