@@ -37,3 +37,4 @@ class Ticket(Base):
     assignee: Mapped["User | None"] = relationship("User", foreign_keys=[assignee_id], back_populates="assigned_tickets")
     comments: Mapped[list["Comment"]] = relationship("Comment", back_populates="ticket", cascade="all, delete-orphan")
     attachments: Mapped[list["Attachment"]] = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
+    notifications: Mapped[list["Notification"]] = relationship("Notification", back_populates="ticket")
