@@ -76,8 +76,8 @@ async def create_ticket(db: AsyncSession, data: TicketCreate, author_id: str) ->
     )
     db.add(ticket)
     await db.flush()
-    await db.refresh(ticket, ["author", "assignee"])
-    return ticket
+    await db.refresh(ticket)
+    return await get_ticket_by_id(db, ticket.id)
 
 
 async def update_ticket(db: AsyncSession, ticket: Ticket, data: TicketUpdate) -> Ticket:
@@ -85,22 +85,22 @@ async def update_ticket(db: AsyncSession, ticket: Ticket, data: TicketUpdate) ->
     for field, value in update_data.items():
         setattr(ticket, field, value)
     await db.flush()
-    await db.refresh(ticket, ["author", "assignee"])
-    return ticket
+    await db.refresh(ticket)
+    return await get_ticket_by_id(db, ticket.id)
 
 
 async def assign_ticket(db: AsyncSession, ticket: Ticket, assignee_id: str | None) -> Ticket:
     ticket.assignee_id = assignee_id
     await db.flush()
-    await db.refresh(ticket, ["author", "assignee"])
-    return ticket
+    await db.refresh(ticket)
+    return await get_ticket_by_id(db, ticket.id)
 
 
 async def change_ticket_status(db: AsyncSession, ticket: Ticket, status: TicketStatus) -> Ticket:
     ticket.status = status
     await db.flush()
-    await db.refresh(ticket, ["author", "assignee"])
-    return ticket
+    await db.refresh(ticket)
+    return await get_ticket_by_id(db, ticket.id)
 
 
 async def delete_ticket(db: AsyncSession, ticket: Ticket) -> None:
