@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.core.redis import close_redis
-from app.routers import auth
+from app.routers import auth, users
 
 
 @asynccontextmanager
@@ -39,6 +39,7 @@ app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads"
 
 PREFIX = "/api/v1"
 app.include_router(auth.router, prefix=f"{PREFIX}/auth", tags=["Autenticación"])
+app.include_router(users.router, prefix=f"{PREFIX}/users", tags=["Usuarios"])
 
 
 @app.get("/health", tags=["Health"])
