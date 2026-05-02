@@ -132,14 +132,11 @@ async def update_ticket(
 async def assign_ticket(
     ticket_id: str,
     data: TicketAssign,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     ticket = await ticket_service.get_ticket_by_id(db=db, ticket_id=ticket_id)
     if not ticket:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found.")
-    if ticket.author_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the author can reassign this ticket.")
 
     ticket = await ticket_service.assign_ticket(db=db, ticket=ticket, assignee_id=data.assignee_id)
     await db.commit()

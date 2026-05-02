@@ -30,14 +30,14 @@ async def google_login(
 
 @router.get(
     "/google/callback",
-    response_model=TokenOut,
     summary="Google OAuth Callback",
     description=(
         "Google redirects here with a `code`. "
         "The backend exchanges it for a Google token, "
         "obtains the user profile, creates or updates it in the database "
-        "and returns its own JWT."
+        "and redirects to the frontend with a JWT."
     ),
+    status_code=status.HTTP_302_FOUND,
 )
 async def google_callback(
     code: str = Query(..., description="Authorization code from Google"),
@@ -45,35 +45,25 @@ async def google_callback(
     error: str | None = Query(default=None, description="Error returned by Google"),
     db: AsyncSession = Depends(get_db),
 ):
+    frontend_callback = f"{settings.FRONTEND_URL}/auth/callback"
+
     if error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Google rejected access: {error}",
-        )
+        return RedirectResponse(url=f"{frontend_callback}?error={error}")
 
     try:
         token_data = await auth_service.exchange_code_for_token(code)
     except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Could not exchange code with Google. Please try again.",
-        )
+        return RedirectResponse(url=f"{frontend_callback}?error=token_exchange_failed")
 
     try:
         google_info = await auth_service.get_google_userinfo(token_data["access_token"])
     except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Could not obtain Google profile.",
-        )
+        return RedirectResponse(url=f"{frontend_callback}?error=userinfo_failed")
 
     user = await auth_service.upsert_user(db, google_info)
     access_token = create_access_token(subject=user.id)
 
-    return TokenOut(
-        access_token=access_token,
-        user=UserOut.model_validate(user),
-    )
+    return RedirectResponse(url=f"{frontend_callback}?token={access_token}")
 
 
 @router.get(
