@@ -5,7 +5,7 @@ from app.core.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.schemas.comment import CommentCreate, CommentOut, CommentListOut
-from app.services import comment_service, ticket_service
+from app.services import comment_service, ticket_service, notification_service
 
 router = APIRouter()
 
@@ -63,6 +63,9 @@ async def create_comment(
         ticket_id=ticket_id,
         author_id=current_user.id,
     )
+
+    await notification_service.notify_comment_added(db=db, ticket=ticket, actor=current_user)
+
     await db.commit()
     return CommentOut.model_validate(comment)
 

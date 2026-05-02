@@ -13,7 +13,7 @@ from app.schemas.ticket import (
     TicketOut,
     TicketListOut,
 )
-from app.services import ticket_service
+from app.services import ticket_service, notification_service
 
 router = APIRouter()
 
@@ -132,13 +132,18 @@ async def update_ticket(
 async def assign_ticket(
     ticket_id: str,
     data: TicketAssign,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     ticket = await ticket_service.get_ticket_by_id(db=db, ticket_id=ticket_id)
     if not ticket:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found.")
 
     ticket = await ticket_service.assign_ticket(db=db, ticket=ticket, assignee_id=data.assignee_id)
+    
+    if ticket.assignee_id:
+        await notification_service.notify_ticket_assigned(db=db, ticket=ticket, actor=current_user)
+        
     await db.commit()
     return TicketOut.model_validate(ticket)
 
@@ -171,6 +176,9 @@ async def change_status(
         )
 
     ticket = await ticket_service.change_ticket_status(db=db, ticket=ticket, status=data.status)
+
+    await notification_service.notify_status_changed(db=db, ticket=ticket, actor=current_user)
+    
     await db.commit()
     return TicketOut.model_validate(ticket)
 
