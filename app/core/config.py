@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE_MB: int = 10
     UPLOAD_DIR: str = "uploads"
 
+    # Gemini AI
+    GEMINI_API_KEY: str
+
     class Config:
         env_file = ".env"
         case_sensitive = True

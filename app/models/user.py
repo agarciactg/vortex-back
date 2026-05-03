@@ -22,3 +22,4 @@ class User(Base):
     attachments: Mapped[list["Attachment"]] = relationship(
         "Attachment", foreign_keys="Attachment.uploaded_by", back_populates="uploader"
     )
+    conversations: Mapped[list["AIConversation"]] = relationship("AIConversation", back_populates="user")

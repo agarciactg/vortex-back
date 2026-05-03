@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.core.redis import close_redis
-from app.routers import auth, users, tickets, comments, attachments, notifications
+from app.routers import auth, users, tickets, comments, attachments, notifications, ai
 
 
 @asynccontextmanager
@@ -44,6 +44,7 @@ app.include_router(tickets.router, prefix=f"{PREFIX}/tickets", tags=["Tickets"])
 app.include_router(comments.router, prefix=f"{PREFIX}/tickets", tags=["Comments"])
 app.include_router(attachments.router, prefix=f"{PREFIX}/tickets", tags=["Attachments"])
 app.include_router(notifications.router, prefix=f"{PREFIX}/notifications", tags=["Notifications"])
+app.include_router(ai.router, prefix=f"{PREFIX}/ai", tags=["AI"])
 
 @app.get("/health", tags=["Health"])
 async def health_check():
