@@ -1,8 +1,10 @@
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from app.models.ticket import Ticket, TicketStatus, TicketPriority
+from app.models.user import User
 from app.schemas.ticket import TicketCreate, TicketUpdate
 
 SORTABLE = {"created_at", "updated_at", "priority", "status", "title"}
@@ -67,6 +69,14 @@ async def get_ticket_by_id(db: AsyncSession, ticket_id: str) -> Ticket | None:
 
 
 async def create_ticket(db: AsyncSession, data: TicketCreate, author_id: str) -> Ticket:
+    if data.assignee_id:
+        res = await db.execute(select(User).where(User.id == data.assignee_id))
+        if not res.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Assignee user not found."
+            )
+
     ticket = Ticket(
         title=data.title,
         description=data.description,
@@ -90,6 +100,13 @@ async def update_ticket(db: AsyncSession, ticket: Ticket, data: TicketUpdate) ->
 
 
 async def assign_ticket(db: AsyncSession, ticket: Ticket, assignee_id: str | None) -> Ticket:
+    if assignee_id:
+        res = await db.execute(select(User).where(User.id == assignee_id))
+        if not res.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Assignee user not found."
+            )
     ticket.assignee_id = assignee_id
     await db.flush()
     await db.refresh(ticket)

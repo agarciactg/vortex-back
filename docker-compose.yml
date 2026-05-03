@@ -43,6 +43,7 @@ services:
       - .:/app
       - uploads_data:/app/uploads
     environment:
+      - PYTHONPATH=/app
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-orbidi}:${POSTGRES_PASSWORD:-orbidi123}@db:5432/${POSTGRES_DB:-orbidi_tickets}
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${SECRET_KEY:-supersecretkey_change_in_production}
