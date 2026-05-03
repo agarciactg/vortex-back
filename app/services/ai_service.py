@@ -148,7 +148,7 @@ async def chat(
     await _save_message(db, conv.id, MessageRole.USER, content=message)
 
     model = genai.GenerativeModel(
-        model_name="gemini-2.5-flash",
+        model_name="gemini-flash-latest",
         system_instruction=SYSTEM_PROMPT,
         tools=[GEMINI_TOOLS],
     )
