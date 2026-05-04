@@ -14,8 +14,6 @@ from app.routers import auth, users, tickets, comments, attachments, notificatio
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield
     await close_redis()
 
